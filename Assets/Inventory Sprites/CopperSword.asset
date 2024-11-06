@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b26aacd17e761834a8221f639e95b9f4, type: 3}
+  m_Name: CopperSword
+  m_EditorClassIdentifier: 
+  <IsStackable>k__BackingField: 0
+  <MaxStackSize>k__BackingField: 1
+  <Name>k__BackingField: Copper Sword
+  <Description>k__BackingField: 
+  <ItemSprite>k__BackingField: {fileID: 1427156461, guid: 5ed8898ee98a1d347846f7f318a663e7, type: 3}
+  <ItemSpriteObject>k__BackingField: {fileID: 2513184970967553993, guid: e31ef6c0762ec0b4986d29627b18cd5c, type: 3}
+  item: {fileID: 1051543298489020270, guid: 880e7642997a3a2438c6b0557e2d438b, type: 3}
+  itemType: 0
+  <DamageBonus>k__BackingField: 15
+  <RangeBonus>k__BackingField: 0.15
+  <AttackSpeedBonus>k__BackingField: 0
+  weaponType: 0

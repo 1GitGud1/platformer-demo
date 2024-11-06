@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b26aacd17e761834a8221f639e95b9f4, type: 3}
+  m_Name: CopperSS
+  m_EditorClassIdentifier: 
+  <IsStackable>k__BackingField: 0
+  <MaxStackSize>k__BackingField: 1
+  <Name>k__BackingField: Copper Shortsword
+  <Description>k__BackingField: 
+  <ItemSprite>k__BackingField: {fileID: 821807500, guid: 5ed8898ee98a1d347846f7f318a663e7, type: 3}
+  <ItemSpriteObject>k__BackingField: {fileID: 3460215505002958622, guid: 4f9af434161dd594dbf3530a248337bb, type: 3}
+  item: {fileID: 7756522189947728919, guid: 7331e544f5c676545b5370d490131ebb, type: 3}
+  itemType: 0
+  <DamageBonus>k__BackingField: 10
+  <RangeBonus>k__BackingField: 0.1
+  <AttackSpeedBonus>k__BackingField: 0.3
+  weaponType: 0

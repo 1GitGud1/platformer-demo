@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78f73fc055fd3664ca93177b1230c46b, type: 3}
+  m_Name: Cherry
+  m_EditorClassIdentifier: 
+  <IsStackable>k__BackingField: 1
+  <MaxStackSize>k__BackingField: 99
+  <Name>k__BackingField: Cherry
+  <Description>k__BackingField: 
+  <ItemSprite>k__BackingField: {fileID: 21300000, guid: 056b6a3f6e14d4af2a7d641c4dd44e79, type: 3}
+  <ItemSpriteObject>k__BackingField: {fileID: 4451707898936106523, guid: 61246e9bc5e46fa4d98b6dfbf4cf91b5, type: 3}
+  item: {fileID: 4015565017762082878, guid: d3517c0e9fcdc154b9791ae80b1cd606, type: 3}
+  itemType: 3
+  <HealthRegen>k__BackingField: 10
