@@ -16,12 +16,13 @@ public class Grid : MonoBehaviour
     int gridSizeX, gridSizeY;
     
 
-    void Start()
-    {
-        Invoke("DelayedStart", 1);
-    }
+    // void Start()
+    // {
+    //     Invoke("DelayedStart", 0.1f);
+    // }
 
-    void DelayedStart(){
+    //this script's execution order has been delayed in project settings to account for map generation time
+    void Start(){
         nodeDiameter = nodeRadius*2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
@@ -40,9 +41,30 @@ public class Grid : MonoBehaviour
                 Vector3Int cellPos = levelTilemap.WorldToCell(worldPoint);
                 //checks the cell at a given position to see if it's empty or not
                 bool walkable = (levelTilemap.GetTile(cellPos) != null) ? false : true;
-                grid[x, y] = new Node(walkable, worldPoint);
+                grid[x, y] = new Node(walkable, worldPoint, x, y);
             }
         }
+    }
+
+    //this is the method that needs to be modified to work with 2D Platformer pathfinding. it decides to which node can it go from it's current position. different lists may need to be created. ie walkNeighbours, jumpNeighbours etc. the lists could be calculated and stored inside the Node class itself
+    public List<Node> GetNeighbours(Node node) {
+        List<Node> neighbours = new List<Node>();
+
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++){
+                if (x == 0 && y == 0)
+                    continue;
+
+                int checkX = node.gridX + x;
+                int checkY = node.gridY + y;
+
+                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
+                    neighbours.Add(grid[checkX, checkY]);
+                }
+            }
+        }
+
+        return neighbours;
     }
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
@@ -58,12 +80,17 @@ public class Grid : MonoBehaviour
         return grid[x,y];
     }
 
+
+    public List<Node> path;
     void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, gridWorldSize.y, 1));
 
         if (grid != null) {
             foreach (Node n in grid) {
                 Gizmos.color = (n.walkable)?Color.white:Color.red;
+                if (path != null) 
+                    if (path.Contains(n))
+                        Gizmos.color = Color.black;
                 Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - 0.02f));
             }
         }
