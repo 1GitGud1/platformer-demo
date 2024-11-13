@@ -27,6 +27,7 @@ public class Pathfinding : MonoBehaviour
         openSet.Add(startNode);
 
         while (openSet.Count > 0) {
+            // to implement heap, change this block of code to Node currentNode = openSet.RemoveFirst()
             Node currentNode = openSet[0];
             for (int i = 1; i < openSet.Count; i++) {
                 if (openSet[i].fCost < currentNode.fCost || openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost) {
