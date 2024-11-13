@@ -75,8 +75,8 @@ public class Grid : MonoBehaviour
         percentX = Mathf.Clamp01(percentX);
         percentY = Mathf.Clamp01(percentY);
 
-        int x = Mathf.RoundToInt((gridSizeX-1)*percentX);
-        int y = Mathf.RoundToInt((gridSizeY-1)*percentY);
+        int x = Mathf.FloorToInt((gridSizeX)*percentX);
+        int y = Mathf.FloorToInt((gridSizeY)*percentY);
         return grid[x,y];
     }
 
