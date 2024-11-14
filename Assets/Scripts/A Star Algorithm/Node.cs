@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Node : IHeapItem<Node>
 {
-    public bool walkable;
+    public NodeType type;
     public Vector3 worldPosition;
     public int gridX;
     public int gridY;
@@ -12,14 +12,21 @@ public class Node : IHeapItem<Node>
     public int gCost;
     public int hCost;
     public Node parent;
+
+    public List<Node> walkNeighbours;
+    public List<Node> jumpNeighbours;
+
     int heapIndex;
 
-    public Node(bool _walkable, Vector3 _worldPosition, int _gridX, int _gridY)
+    public Node(NodeType _type, Vector3 _worldPosition, int _gridX, int _gridY)
     {
-        walkable = _walkable;
+        type = _type;
         worldPosition = _worldPosition;
         gridX = _gridX;
         gridY = _gridY;
+
+        walkNeighbours = new List<Node>();
+        jumpNeighbours = new List<Node>();
     }
 
     public int fCost {
@@ -27,6 +34,8 @@ public class Node : IHeapItem<Node>
             return gCost + hCost;
         }
     }
+
+
 
     public int HeapIndex {
         get {
@@ -44,4 +53,12 @@ public class Node : IHeapItem<Node>
         }
         return -compare;
     }
+}
+
+public enum NodeType
+{
+    walkable,
+    nonWalkable,
+    grounded,
+    edge
 }

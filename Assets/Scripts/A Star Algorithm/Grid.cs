@@ -11,6 +11,7 @@ public class Grid : MonoBehaviour
     public Vector3 gridWorldSize;
     public float nodeRadius;
     Node[,] grid;
+    List<Vector2> groundNodes;
 
     float nodeDiameter;
     int gridSizeX, gridSizeY;
@@ -27,21 +28,63 @@ public class Grid : MonoBehaviour
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
         CreateGrid();
+        Invoke("CreateLinks", 1f);
     }
 
     //function that sets up a grid for pathfinding and places all the nodes within it
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY];
+        groundNodes = new List<Vector2>();
         Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x/2 - Vector3.up * gridWorldSize.y/2;
 
-        for (int x = 0; x < gridSizeX; x++){
-            for (int y = 0; y < gridSizeY; y++){
+        for (int y = 0; y < gridSizeY; y++){
+            for (int x = 0; x < gridSizeX; x++){
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x*nodeDiameter + nodeRadius) + Vector3.up * (y*nodeDiameter + nodeRadius);
+                Vector3 belowWorldPoint = worldBottomLeft + Vector3.right * (x*nodeDiameter + nodeRadius) + Vector3.up * ((y-1)*nodeDiameter + nodeRadius);
                 Vector3Int cellPos = levelTilemap.WorldToCell(worldPoint);
+                Vector3Int belowCellPos = levelTilemap.WorldToCell(belowWorldPoint);
                 //checks the cell at a given position to see if it's empty or not
-                bool walkable = (levelTilemap.GetTile(cellPos) != null) ? false : true;
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
+                NodeType type = NodeType.nonWalkable;
+                // bool walkable = false;
+                // bool grounded = false;
+                if (levelTilemap.GetTile(cellPos) == null) {
+                    type = NodeType.walkable;
+                    Node checkLeft = grid[x-1, y];
+                    if (checkLeft.type == NodeType.grounded) {
+                        type = NodeType.edge;
+                    }
+                    if (levelTilemap.GetTile(belowCellPos) != null) {
+                        type = NodeType.grounded;
+                        groundNodes.Add(new Vector2(x, y));
+                        if (checkLeft.type == NodeType.walkable) {
+                            checkLeft.type = NodeType.edge;
+                        }
+                    } 
+                }
+
+                grid[x, y] = new Node(type, worldPoint, x, y);
+            }
+        }
+    }
+
+    void CreateLinks()
+    {
+        for (int x = 0; x < gridSizeX; x++) {
+            for (int y = 0; y < gridSizeY; y++) {
+                // creating neighbours for walking
+                if ((x-1) >= 0 && (x-1) < gridSizeX) {
+                    Node checkNode = grid[x-1, y];
+                    if (checkNode.type == NodeType.grounded) {
+                        grid[x, y].walkNeighbours.Add(checkNode);
+                    }
+                }
+                if ((x+1) >= 0 && (x+1) < gridSizeX) {
+                    Node checkNode = grid[x+1, y];
+                    if (checkNode.type == NodeType.grounded)
+                        grid[x, y].walkNeighbours.Add(checkNode);
+                }
+                //Debug.Log(grid[x, y].walkNeighbours.Count);
             }
         }
     }
@@ -81,16 +124,19 @@ public class Grid : MonoBehaviour
     }
 
 
-    public List<Node> path;
+    //public List<Node> path;
     void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, gridWorldSize.y, 1));
 
         if (grid != null) {
             foreach (Node n in grid) {
-                Gizmos.color = (n.walkable)?Color.white:Color.red;
-                if (path != null) 
-                    if (path.Contains(n))
-                        Gizmos.color = Color.black;
+                Gizmos.color = (n.type == NodeType.walkable)?Color.white:Color.red;
+                if (n.type == NodeType.grounded) {
+                    Gizmos.color = Color.green;
+                } 
+                else if (n.type == NodeType.edge){
+                    Gizmos.color = Color.yellow;
+                }
                 Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - 0.02f));
             }
         }

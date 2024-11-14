@@ -343,6 +343,7 @@ GameObject:
   - component: {fileID: 109559881}
   - component: {fileID: 109559880}
   - component: {fileID: 109559882}
+  - component: {fileID: 109559883}
   m_Layer: 0
   m_Name: A*
   m_TagString: Untagged
@@ -395,8 +396,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8290633680c5a8d429b4db2008b7845b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seeker: {fileID: 1356836983}
-  target: {fileID: 1326861779}
+--- !u!114 &109559883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109559879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718148754a99f474abb5f1d5dd76cdf1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &115924977 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3517945501375740987, guid: fe364242647b3a042965dc975cc07b76, type: 3}
@@ -27018,8 +27029,8 @@ MonoBehaviour:
   animator: {fileID: 1356836981}
   monsterDamage: 10
   speed: 0.51
-  target: {fileID: 1326861779}
   minimumDistance: 0.5
+  target: {fileID: 1326861779}
 --- !u!50 &1356836987
 Rigidbody2D:
   serializedVersion: 4
