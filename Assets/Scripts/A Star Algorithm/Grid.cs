@@ -11,7 +11,7 @@ public class Grid : MonoBehaviour
     public Vector3 gridWorldSize;
     public float nodeRadius;
     Node[,] grid;
-    List<Vector2> groundNodes;
+    List<Vector2Int> groundNodes;
 
     float nodeDiameter;
     int gridSizeX, gridSizeY;
@@ -35,7 +35,7 @@ public class Grid : MonoBehaviour
     void CreateGrid()
     {
         grid = new Node[gridSizeX, gridSizeY];
-        groundNodes = new List<Vector2>();
+        groundNodes = new List<Vector2Int>();
         Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x/2 - Vector3.up * gridWorldSize.y/2;
 
         for (int y = 0; y < gridSizeY; y++){
@@ -56,7 +56,7 @@ public class Grid : MonoBehaviour
                     }
                     if (levelTilemap.GetTile(belowCellPos) != null) {
                         type = NodeType.grounded;
-                        groundNodes.Add(new Vector2(x, y));
+                        groundNodes.Add(new Vector2Int(x, y));
                         if (checkLeft.type == NodeType.walkable) {
                             checkLeft.type = NodeType.edge;
                         }
@@ -70,21 +70,69 @@ public class Grid : MonoBehaviour
 
     void CreateLinks()
     {
+        foreach (Vector2Int nodeVector in groundNodes) {
+            Node node = grid[nodeVector.x, nodeVector.y];
+            Node checkNode = grid[nodeVector.x-1, nodeVector.y];
+            // creating walk links
+            if (checkNode.type != NodeType.nonWalkable) 
+                node.walkNeighbours.Add(checkNode);
+            checkNode = grid[nodeVector.x+1, nodeVector.y];
+            if (checkNode.type != NodeType.nonWalkable)
+                node.walkNeighbours.Add(checkNode);
+            
+            //creating jump links
+            checkNode = grid[nodeVector.x-1, nodeVector.y+2];
+            if (checkNode.type == NodeType.grounded)
+                node.jumpNeighbours.Add(checkNode);
+            checkNode = grid[nodeVector.x+1, nodeVector.y+2];
+            if (checkNode.type == NodeType.grounded)
+                node.jumpNeighbours.Add(checkNode);
+
+            for (int w = -2; w <= 2; w++) {
+                if (w == 0)
+                    continue;
+                checkNode = grid[nodeVector.x+w, nodeVector.y+1];
+                if (checkNode.type == NodeType.grounded)
+                    node.jumpNeighbours.Add(checkNode);
+            }
+
+            checkNode = grid[nodeVector.x-1, nodeVector.y];
+            if (checkNode.type == NodeType.edge) {
+                if (grid[nodeVector.x-2, nodeVector.y].type == NodeType.grounded)
+                    node.jumpNeighbours.Add(checkNode);
+            }
+            checkNode = grid[nodeVector.x+1, nodeVector.y];
+            if (checkNode.type == NodeType.edge) {
+                if (grid[nodeVector.x+2, nodeVector.y].type == NodeType.grounded)
+                    node.jumpNeighbours.Add(checkNode);
+            }
+            Debug.Log(node.jumpNeighbours.Count);
+        }
         for (int x = 0; x < gridSizeX; x++) {
             for (int y = 0; y < gridSizeY; y++) {
-                // creating neighbours for walking
-                if ((x-1) >= 0 && (x-1) < gridSizeX) {
-                    Node checkNode = grid[x-1, y];
-                    if (checkNode.type == NodeType.grounded) {
-                        grid[x, y].walkNeighbours.Add(checkNode);
+                // if (grid[x, y].type == NodeType.grounded) {
+                //     if ((x-1) >= 0 && (x-1) < gridSizeX) {
+                //         Node checkNode = grid[x-1, y];
+                //         if (checkNode.type != NodeType.nonWalkable) {
+                //             grid[x, y].walkNeighbours.Add(checkNode);
+                //         }
+                //     }
+                //     if ((x+1) >= 0 && (x+1) < gridSizeX) {
+                //         Node checkNode = grid[x+1, y];
+                //         if (checkNode.type != NodeType.nonWalkable)
+                //             grid[x, y].walkNeighbours.Add(checkNode);
+                //     }
+                // }
+                //creating fall links
+                if (grid[x, y].type == NodeType.edge) {
+                    for (int z = 1; z < 7; z++) {
+                        Node checkNode = grid[x, y-z];
+                        if (checkNode.type == NodeType.grounded) {
+                            grid[x, y].walkNeighbours.Add(checkNode);
+                            z = 7;
+                        }
                     }
                 }
-                if ((x+1) >= 0 && (x+1) < gridSizeX) {
-                    Node checkNode = grid[x+1, y];
-                    if (checkNode.type == NodeType.grounded)
-                        grid[x, y].walkNeighbours.Add(checkNode);
-                }
-                //Debug.Log(grid[x, y].walkNeighbours.Count);
             }
         }
     }
@@ -92,20 +140,28 @@ public class Grid : MonoBehaviour
     //this is the method that needs to be modified to work with 2D Platformer pathfinding. it decides to which node can it go from it's current position. different lists may need to be created. ie walkNeighbours, jumpNeighbours etc. the lists could be calculated and stored inside the Node class itself
     public List<Node> GetNeighbours(Node node) {
         List<Node> neighbours = new List<Node>();
+        List<Node> walkNeighbours = new List<Node>();
+        List<Node> jumpNeighbours = new List<Node>();
 
-        for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++){
-                if (x == 0 && y == 0)
-                    continue;
+        walkNeighbours = node.walkNeighbours;
+        jumpNeighbours = node.jumpNeighbours;
 
-                int checkX = node.gridX + x;
-                int checkY = node.gridY + y;
+        neighbours.AddRange(walkNeighbours);
+        neighbours.AddRange(jumpNeighbours);
 
-                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
-                    neighbours.Add(grid[checkX, checkY]);
-                }
-            }
-        }
+        // for (int x = -1; x <= 1; x++) {
+        //     for (int y = -1; y <= 1; y++){
+        //         if (x == 0 && y == 0)
+        //             continue;
+
+        //         int checkX = node.gridX + x;
+        //         int checkY = node.gridY + y;
+
+        //         if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
+        //             neighbours.Add(grid[checkX, checkY]);
+        //         }
+        //     }
+        // }
 
         return neighbours;
     }

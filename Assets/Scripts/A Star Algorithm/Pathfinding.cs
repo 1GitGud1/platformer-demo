@@ -74,6 +74,7 @@ public class Pathfinding : MonoBehaviour
     }
 
     Vector3[] RetracePath(Node startNode, Node endNode) {
+        //change the path to be some sort of joint list of nodes and a jump velocity to reach that node (ie if needs to jump then 50f, if doesnt need to jump 0f)
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
 

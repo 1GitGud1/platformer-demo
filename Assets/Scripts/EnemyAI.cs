@@ -106,7 +106,7 @@ public class EnemyAI : MonoBehaviour
                 targetIndex++;
                 if (targetIndex >= path.Length) {
                     targetIndex = 0;
-                    //path = new Vector3[0];
+                    path = new Vector3[0];
                     yield break;
                 }
                 currentWaypoint = path[targetIndex];
