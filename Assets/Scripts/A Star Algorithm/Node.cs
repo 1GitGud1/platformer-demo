@@ -12,6 +12,7 @@ public class Node : IHeapItem<Node>
     public int gCost;
     public int hCost;
     public Node parent;
+    public bool jumpToNode;
 
     public List<Node> walkNeighbours;
     public List<Node> jumpNeighbours;

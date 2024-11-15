@@ -15,7 +15,7 @@ public class EnemyAI : MonoBehaviour
     private bool attacking = false;
 
     public Transform target;
-    Vector3[] path;
+    Node[] path;
     int targetIndex;
 
 
@@ -88,7 +88,7 @@ public class EnemyAI : MonoBehaviour
         attacking = false;
     }
 
-    public void OnPathFound(Vector3[] newPath, bool pathSuccessful) 
+    public void OnPathFound(Node[] newPath, bool pathSuccessful) 
     {
         if (pathSuccessful) {
             path = newPath;
@@ -99,20 +99,30 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator FollowPath() 
     {
-        Vector3 currentWaypoint = path[0];
+        Vector3 currentWaypoint = path[0].worldPosition;
 
         while (true) {
-            if (transform.position == currentWaypoint) {
+            if (Vector2.Distance(transform.position,currentWaypoint) < 0.1f) {
                 targetIndex++;
                 if (targetIndex >= path.Length) {
                     targetIndex = 0;
-                    path = new Vector3[0];
+                    path = new Node[0];
                     yield break;
                 }
-                currentWaypoint = path[targetIndex];
+                currentWaypoint = path[targetIndex].worldPosition;
+                if (path[targetIndex].jumpToNode){
+                    m_Rigidbody2D.velocity = new Vector2(0, 0);
+                    m_Rigidbody2D.AddForce(new Vector2(0, 3.5f), ForceMode2D.Impulse);
+                }
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed*Time.deltaTime);
+            if(transform.position.x < currentWaypoint.x){
+                m_Rigidbody2D.velocity = new Vector2(90f*Time.deltaTime, m_Rigidbody2D.velocity.y);
+            } else {
+                m_Rigidbody2D.velocity = new Vector2(-90f*Time.deltaTime, m_Rigidbody2D.velocity.y);
+            }
+
+            //transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed*Time.deltaTime);
             yield return null;
         }
     }
@@ -122,10 +132,10 @@ public class EnemyAI : MonoBehaviour
             for (int i = targetIndex; i < path.Length; i++) {
                 Gizmos.color = Color.black;
                 if (i == targetIndex) {
-                    Gizmos.DrawLine(transform.position, path[i]);
+                    Gizmos.DrawLine(transform.position, path[i].worldPosition);
                 } 
                 else {
-                    Gizmos.DrawLine(path[i-1], path[i]);
+                    Gizmos.DrawLine(path[i-1].worldPosition, path[i].worldPosition);
                 }
             }
         }

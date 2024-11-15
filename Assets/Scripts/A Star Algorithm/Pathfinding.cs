@@ -21,7 +21,7 @@ public class Pathfinding : MonoBehaviour
     IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
     {
         //
-        Vector3[] waypoints = new Vector3[0];
+        Node[] waypoints = new Node[0];
         bool pathSuccess = false;
 
         Node startNode = grid.NodeFromWorldPoint(startPos);
@@ -49,7 +49,7 @@ public class Pathfinding : MonoBehaviour
                     break;
                 }
 
-                foreach (Node neighbour in grid.GetNeighbours(currentNode)) {
+                foreach (Node neighbour in currentNode.walkNeighbours) {
                     if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
                         continue;
                     }
@@ -59,6 +59,23 @@ public class Pathfinding : MonoBehaviour
                         neighbour.gCost = newMovementCostToNeighbour;
                         neighbour.hCost = GetDistance(neighbour, targetNode);
                         neighbour.parent = currentNode;
+                        neighbour.jumpToNode = false;
+
+                        if (!openSet.Contains(neighbour))
+                            openSet.Add(neighbour);
+                    }
+                }
+                foreach (Node neighbour in currentNode.jumpNeighbours) {
+                    if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
+                        continue;
+                    }
+
+                    int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
+                        neighbour.gCost = newMovementCostToNeighbour;
+                        neighbour.hCost = GetDistance(neighbour, targetNode);
+                        neighbour.parent = currentNode;
+                        neighbour.jumpToNode = true;
 
                         if (!openSet.Contains(neighbour))
                             openSet.Add(neighbour);
@@ -73,7 +90,7 @@ public class Pathfinding : MonoBehaviour
         requestManager.FinishedProcessingPath(waypoints, pathSuccess);
     }
 
-    Vector3[] RetracePath(Node startNode, Node endNode) {
+    Node[] RetracePath(Node startNode, Node endNode) {
         //change the path to be some sort of joint list of nodes and a jump velocity to reach that node (ie if needs to jump then 50f, if doesnt need to jump 0f)
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
@@ -83,10 +100,10 @@ public class Pathfinding : MonoBehaviour
             currentNode = currentNode.parent;
         }
         //might need to change waypoints from Vector3[] to List<Node>
-        Vector3[] waypoints = SimplifyPath(path);
-        //path.Reverse();
-        Array.Reverse(waypoints);
-        return waypoints;
+        //Vector3[] waypoints = SimplifyPath(path);
+        path.Reverse();
+        //Array.Reverse(waypoints);
+        return path.ToArray();
         
         //grid.path = path;
     }

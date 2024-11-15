@@ -20,7 +20,7 @@ public class PathRequestManager : MonoBehaviour
     }
 
 
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback) {
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Node[], bool> callback) {
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
         instance.TryProcessNext();
@@ -35,7 +35,7 @@ public class PathRequestManager : MonoBehaviour
         }
     }
 
-    public void FinishedProcessingPath(Vector3[] path, bool success) {
+    public void FinishedProcessingPath(Node[] path, bool success) {
         currentPathRequest.callback(path, success);
         isProcessingPath = false;
         TryProcessNext();
@@ -45,9 +45,9 @@ public class PathRequestManager : MonoBehaviour
     {
         public Vector3 pathStart;
         public Vector3 pathEnd;
-        public Action<Vector3[], bool> callback;
+        public Action<Node[], bool> callback;
 
-        public PathRequest(Vector3 _start, Vector3 _end, Action<Vector3[], bool> _callback) {
+        public PathRequest(Vector3 _start, Vector3 _end, Action<Node[], bool> _callback) {
             pathStart = _start;
             pathEnd = _end;
             callback = _callback;

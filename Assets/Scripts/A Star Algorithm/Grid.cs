@@ -138,6 +138,7 @@ public class Grid : MonoBehaviour
     }
 
     //this is the method that needs to be modified to work with 2D Platformer pathfinding. it decides to which node can it go from it's current position. different lists may need to be created. ie walkNeighbours, jumpNeighbours etc. the lists could be calculated and stored inside the Node class itself
+
     public List<Node> GetNeighbours(Node node) {
         List<Node> neighbours = new List<Node>();
         List<Node> walkNeighbours = new List<Node>();
@@ -148,20 +149,6 @@ public class Grid : MonoBehaviour
 
         neighbours.AddRange(walkNeighbours);
         neighbours.AddRange(jumpNeighbours);
-
-        // for (int x = -1; x <= 1; x++) {
-        //     for (int y = -1; y <= 1; y++){
-        //         if (x == 0 && y == 0)
-        //             continue;
-
-        //         int checkX = node.gridX + x;
-        //         int checkY = node.gridY + y;
-
-        //         if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
-        //             neighbours.Add(grid[checkX, checkY]);
-        //         }
-        //     }
-        // }
 
         return neighbours;
     }
