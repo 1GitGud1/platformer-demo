@@ -81,30 +81,36 @@ public class Grid : MonoBehaviour
                 node.walkNeighbours.Add(checkNode);
             
             //creating jump links
-            checkNode = grid[nodeVector.x-1, nodeVector.y+2];
-            if (checkNode.type == NodeType.grounded)
-                node.jumpNeighbours.Add(checkNode);
-            checkNode = grid[nodeVector.x+1, nodeVector.y+2];
-            if (checkNode.type == NodeType.grounded)
-                node.jumpNeighbours.Add(checkNode);
-
-            for (int w = -2; w <= 2; w++) {
-                if (w == 0)
-                    continue;
-                checkNode = grid[nodeVector.x+w, nodeVector.y+1];
+            if (grid[nodeVector.x, nodeVector.y+1].type != NodeType.nonWalkable) {
+                checkNode = grid[nodeVector.x-1, nodeVector.y+2];
                 if (checkNode.type == NodeType.grounded)
                     node.jumpNeighbours.Add(checkNode);
-            }
+                checkNode = grid[nodeVector.x+1, nodeVector.y+2];
+                if (checkNode.type == NodeType.grounded)
+                    node.jumpNeighbours.Add(checkNode);
 
-            checkNode = grid[nodeVector.x-1, nodeVector.y];
-            if (checkNode.type == NodeType.edge) {
-                if (grid[nodeVector.x-2, nodeVector.y].type == NodeType.grounded)
-                    node.jumpNeighbours.Add(checkNode);
-            }
-            checkNode = grid[nodeVector.x+1, nodeVector.y];
-            if (checkNode.type == NodeType.edge) {
-                if (grid[nodeVector.x+2, nodeVector.y].type == NodeType.grounded)
-                    node.jumpNeighbours.Add(checkNode);
+                for (int w = -2; w <= 2; w++) {
+                    if (w == 0)
+                        continue;
+                    checkNode = grid[nodeVector.x+w, nodeVector.y+1];
+                    if (checkNode.type == NodeType.grounded)
+                        node.jumpNeighbours.Add(checkNode);
+                }
+
+                checkNode = grid[nodeVector.x-1, nodeVector.y];
+                if (checkNode.type == NodeType.edge) {
+                    if (grid[nodeVector.x-2, nodeVector.y].type == NodeType.grounded)
+                        node.jumpNeighbours.Add(grid[nodeVector.x-2, nodeVector.y]);
+                    if (grid[nodeVector.x-3, nodeVector.y].type == NodeType.grounded)
+                        node.jumpNeighbours.Add(grid[nodeVector.x-3, nodeVector.y]);
+                }
+                checkNode = grid[nodeVector.x+1, nodeVector.y];
+                if (checkNode.type == NodeType.edge) {
+                    if (grid[nodeVector.x+2, nodeVector.y].type == NodeType.grounded)
+                        node.jumpNeighbours.Add(grid[nodeVector.x+2, nodeVector.y]);
+                    if (grid[nodeVector.x+3, nodeVector.y].type == NodeType.grounded)
+                        node.jumpNeighbours.Add(grid[nodeVector.x+3, nodeVector.y]);
+                }
             }
             Debug.Log(node.jumpNeighbours.Count);
         }
@@ -173,7 +179,7 @@ public class Grid : MonoBehaviour
 
         if (grid != null) {
             foreach (Node n in grid) {
-                Gizmos.color = (n.type == NodeType.walkable)?Color.white:Color.red;
+                Gizmos.color = (n.type != NodeType.nonWalkable)?Color.white:Color.red;
                 if (n.type == NodeType.grounded) {
                     Gizmos.color = Color.green;
                 } 

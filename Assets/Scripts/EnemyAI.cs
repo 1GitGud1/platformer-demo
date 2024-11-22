@@ -13,22 +13,26 @@ public class EnemyAI : MonoBehaviour
     private bool m_FacingRight = false;
     float jumpDirection;
     private bool attacking = false;
+    private bool enableRandomMove = false;
 
     public Transform target;
     Node[] path;
     int targetIndex;
+    float pathRequestCooldown;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        Invoke("DelayedStart", 5f);
+        // Invoke("DelayedStart", 5f);
+        //StartCoroutine("RandomMove");
     }
 
-    void DelayedStart()
-    {
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
-    }
+    // void DelayedStart()
+    // {
+    //     PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        
+    // }
 
     private void Awake()
     {
@@ -48,7 +52,15 @@ public class EnemyAI : MonoBehaviour
     {
         if(Vector2.Distance(transform.position, target.position) > minimumDistance)
         {
-            //transform.position = Vector2.MoveTowards(new Vector2(transform.position.x, transform.position.y), new Vector2(target.position.x, transform.position.y), speed * Time.deltaTime);
+            if (pathRequestCooldown > 1f) {
+                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                pathRequestCooldown = 0;
+            }
+            
+            if (enableRandomMove) {
+                StartCoroutine("RandomMove");
+            }
+
             animator.SetFloat("Speed", 1);
         } else if(!attacking)
         {
@@ -57,16 +69,20 @@ public class EnemyAI : MonoBehaviour
             StartCoroutine(Attack());
         }
         
-        if ((target.position.x - transform.position.x) > 0 && !m_FacingRight)
+        if (speed > 0 && !m_FacingRight)
 		{
 			// ... flip the player.
 	    	Flip();
 		}
-		else if ((target.position.x - transform.position.x) < 0 && m_FacingRight)
+		else if (speed < 0 && m_FacingRight)
 		{
 			// ... flip the player.
 			Flip();
 		}
+
+        m_Rigidbody2D.velocity = new Vector2(speed*Time.deltaTime, m_Rigidbody2D.velocity.y);
+
+        pathRequestCooldown += Time.deltaTime;
     }
 
     private void Flip()
@@ -84,7 +100,7 @@ public class EnemyAI : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
         m_Rigidbody2D.AddForce(new Vector2((m_FacingRight ? 1f : -1f), 2f), ForceMode2D.Impulse);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.25f);
         attacking = false;
     }
 
@@ -92,14 +108,20 @@ public class EnemyAI : MonoBehaviour
     {
         if (pathSuccessful) {
             path = newPath;
+
+            enableRandomMove = false;
+            StopCoroutine("RandomMove");
+
             StopCoroutine("FollowPath");
             StartCoroutine("FollowPath");
-        }
+        } 
+        
     }
 
     IEnumerator FollowPath() 
     {
         Vector3 currentWaypoint = path[0].worldPosition;
+        targetIndex = 0;
 
         while (true) {
             if (Vector2.Distance(transform.position,currentWaypoint) < 0.1f) {
@@ -107,24 +129,50 @@ public class EnemyAI : MonoBehaviour
                 if (targetIndex >= path.Length) {
                     targetIndex = 0;
                     path = new Node[0];
+
+                    enableRandomMove = true;
+
                     yield break;
                 }
                 currentWaypoint = path[targetIndex].worldPosition;
                 if (path[targetIndex].jumpToNode){
-                    m_Rigidbody2D.velocity = new Vector2(0, 0);
-                    m_Rigidbody2D.AddForce(new Vector2(0, 3.5f), ForceMode2D.Impulse);
+                    m_Rigidbody2D.velocity = new Vector2(speed*Time.deltaTime, 0);
+                    yield return new WaitForSeconds(0.1f);
+                    m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
                 }
             }
 
+            //movement towards nodes logic
             if(transform.position.x < currentWaypoint.x){
-                m_Rigidbody2D.velocity = new Vector2(90f*Time.deltaTime, m_Rigidbody2D.velocity.y);
-            } else {
-                m_Rigidbody2D.velocity = new Vector2(-90f*Time.deltaTime, m_Rigidbody2D.velocity.y);
+                speed = 90;
+            } 
+            else if (Mathf.Abs(transform.position.x - currentWaypoint.x) < 0.02f) {
+                m_Rigidbody2D.velocity = new Vector2(0, m_Rigidbody2D.velocity.y);
+            }
+            else {
+                speed = -90;
             }
 
             //transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed*Time.deltaTime);
             yield return null;
         }
+    }
+
+    IEnumerator RandomMove()
+    {
+        enableRandomMove = false;
+            int direction = Random.Range(1, 11);
+            Debug.Log(direction);
+            if(direction < 7) {
+                speed = (transform.position.x - target.position.x)/Mathf.Abs(transform.position.x - target.position.x) * -90;
+            } else if(direction > 9) {
+                m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
+            } else {
+                speed = (transform.position.x - target.position.x)/Mathf.Abs(transform.position.x - target.position.x) * 90;
+            }
+
+            yield return new WaitForSeconds(0.3f);
+        enableRandomMove = true;
     }
 
     public void OnDrawGizmos() {
