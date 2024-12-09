@@ -27,7 +27,7 @@ public class Pathfinding : MonoBehaviour
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        if (startNode.type != NodeType.nonWalkable && targetNode.type != NodeType.nonWalkable) {
+        if (startNode.type == NodeType.grounded && targetNode.type == NodeType.grounded) {
             List<Node> openSet = new List<Node>();
             HashSet<Node> closedSet = new HashSet<Node>();
             openSet.Add(startNode);
@@ -99,9 +99,10 @@ public class Pathfinding : MonoBehaviour
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
-        path.Add(currentNode);
+        //path.Add(currentNode);
+        
         //might need to change waypoints from Vector3[] to List<Node>
-        //Vector3[] waypoints = SimplifyPath(path);
+        
         path.Reverse();
         //Array.Reverse(waypoints);
         return path.ToArray();

@@ -112,7 +112,7 @@ public class Grid : MonoBehaviour
                         node.jumpNeighbours.Add(grid[nodeVector.x+3, nodeVector.y]);
                 }
             }
-            Debug.Log(node.jumpNeighbours.Count);
+            //Debug.Log(node.jumpNeighbours.Count);
         }
         for (int x = 0; x < gridSizeX; x++) {
             for (int y = 0; y < gridSizeY; y++) {

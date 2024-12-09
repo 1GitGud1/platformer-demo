@@ -8,6 +8,7 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
     public GoblinIdleState idleState = new GoblinIdleState();
     public GoblinPursuingState pursuingState = new GoblinPursuingState();
     public GoblinShootingState shootingState = new GoblinShootingState();
+    public GoblinSearchingState searchingState = new GoblinSearchingState();
     public GoblinDeadState deadState = new GoblinDeadState();
 
     public Rigidbody2D m_Rigidbody2D;
@@ -20,6 +21,8 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
 
     public bool m_FacingRight = false;
     public float bowAngle;
+
+    public float jumpCooldown;
 
     public int maxHealth = 20;
     int currentHealth;
@@ -116,5 +119,20 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
 
         
         knockbackScript.knockback(point.x, knockbackStr);
+    }
+
+    public bool GroundCheck()
+    {
+        if (jumpCooldown >= 0.3f) {
+            RaycastHit2D groundCheck = Physics2D.Raycast(transform.position, Vector2.down, 0.15f, groundLayerMask);
+            if (groundCheck.collider != null) {
+                //Debug.Log("goblin jump check");
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

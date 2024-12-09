@@ -6,6 +6,7 @@ public class EnemyAI : MonoBehaviour
 {
     private Rigidbody2D m_Rigidbody2D;
     public Animator animator;
+    public LayerMask groundLayer;
 
     public int monsterDamage;
     public float speed;
@@ -13,6 +14,7 @@ public class EnemyAI : MonoBehaviour
     private bool m_FacingRight = false;
     float jumpDirection;
     private bool attacking = false;
+    private float jumpCooldown;
     private bool enableRandomMove = false;
 
     public Transform target;
@@ -64,6 +66,7 @@ public class EnemyAI : MonoBehaviour
             animator.SetFloat("Speed", 1);
         } else if(!attacking)
         {
+            //StopCoroutine("FollowPath");
             animator.SetFloat("Speed", 0);
             attacking = true;
             StartCoroutine(Attack());
@@ -82,6 +85,7 @@ public class EnemyAI : MonoBehaviour
 
         m_Rigidbody2D.velocity = new Vector2(speed*Time.deltaTime, m_Rigidbody2D.velocity.y);
 
+        jumpCooldown += Time.deltaTime;
         pathRequestCooldown += Time.deltaTime;
     }
 
@@ -135,14 +139,15 @@ public class EnemyAI : MonoBehaviour
                     yield break;
                 }
                 currentWaypoint = path[targetIndex].worldPosition;
-                if (path[targetIndex].jumpToNode){
-                    m_Rigidbody2D.velocity = new Vector2(speed*Time.deltaTime, 0);
-                    yield return new WaitForSeconds(0.1f);
-                    m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
-                }
             }
 
             //movement towards nodes logic
+            if (path[targetIndex].jumpToNode && GroundCheck()){
+                jumpCooldown = 0;
+                m_Rigidbody2D.velocity = new Vector2(speed*Time.deltaTime, 0);
+                yield return new WaitForSeconds(0.1f);
+                m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
+            }
             if(transform.position.x < currentWaypoint.x){
                 speed = 90;
             } 
@@ -162,10 +167,11 @@ public class EnemyAI : MonoBehaviour
     {
         enableRandomMove = false;
             int direction = Random.Range(1, 11);
-            Debug.Log(direction);
+            //Debug.Log(direction);
             if(direction < 7) {
                 speed = (transform.position.x - target.position.x)/Mathf.Abs(transform.position.x - target.position.x) * -90;
-            } else if(direction > 9) {
+            } else if(direction > 8 && GroundCheck()) {
+                jumpCooldown = 0;
                 m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
             } else {
                 speed = (transform.position.x - target.position.x)/Mathf.Abs(transform.position.x - target.position.x) * 90;
@@ -173,6 +179,20 @@ public class EnemyAI : MonoBehaviour
 
             yield return new WaitForSeconds(0.3f);
         enableRandomMove = true;
+    }
+
+    private bool GroundCheck()
+    {
+        if (jumpCooldown >= 0.3f) {
+            RaycastHit2D groundCheck = Physics2D.Raycast(transform.position, Vector2.down, 0.15f, groundLayer);
+            if (groundCheck.collider != null) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public void OnDrawGizmos() {
@@ -187,5 +207,6 @@ public class EnemyAI : MonoBehaviour
                 }
             }
         }
+        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y-0.15f, transform.position.z));
     }
 }
