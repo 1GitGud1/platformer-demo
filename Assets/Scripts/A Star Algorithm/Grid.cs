@@ -172,6 +172,18 @@ public class Grid : MonoBehaviour
         return grid[x,y];
     }
 
+    public Node FindGroundedNode(Node node, int num)
+    {
+        for (int y = 0; y <= num; y++)
+        {
+            if (grid[node.gridX, node.gridY-y].type == NodeType.grounded)
+            {
+                return grid[node.gridX, node.gridY-y];
+            }
+        }
+        return node;
+    }
+
 
     //public List<Node> path;
     void OnDrawGizmos() {

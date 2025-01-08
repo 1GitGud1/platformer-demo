@@ -24,6 +24,12 @@ public class GoblinShootingState : GoblinBaseState
         //Debug.Log((angleRad/(Mathf.PI/180f)));
         goblin.bowAngle += (targetAngle-goblin.bowAngle)/32;
         goblin.bow.transform.rotation = Quaternion.Euler(0, 0, goblin.bowAngle);
+
+        //saving players last seen position
+        RaycastHit2D raycastHit2D = Physics2D.Raycast(goblin.transform.position, (goblin.target.position - goblin.transform.position), distance, goblin.groundLayerMask);
+        //if (raycastHit2D.collider == null && distance < 2f) {
+            goblin.targetLastSeen = goblin.target.position;
+        //}
     }
 
     public override void FixedUpdateState(GoblinStateManager goblin)

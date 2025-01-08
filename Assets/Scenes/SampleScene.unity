@@ -26885,7 +26885,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!95 &1356836981
 Animator:
   serializedVersion: 5
@@ -28302,6 +28302,7 @@ MonoBehaviour:
   m_Rigidbody2D: {fileID: 1801257375}
   animator: {fileID: 1801257382}
   target: {fileID: 1326861779}
+  targetLastSeen: {x: 0, y: 0, z: 0}
   bow: {fileID: 0}
   arrow: {fileID: 5945938771890995538, guid: 1dfc55bbd34f83141afc1dfcbba892f2, type: 3}
   groundLayerMask:
@@ -28310,6 +28311,7 @@ MonoBehaviour:
   knockbackScript: {fileID: 1801257374}
   m_FacingRight: 1
   bowAngle: 0
+  jumpCooldown: 0
   maxHealth: 30
 --- !u!1 &1802864129 stripped
 GameObject:

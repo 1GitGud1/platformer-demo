@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class GoblinPursuingState : GoblinBaseState
 {
-    float horizontalMove = 0f;
+    public float horizontalMove = 0f;
     float dangerDistance = 0.5f;
     float minimumDistance = 1f;
     float maximumDistance = 1.25f;
     float nextAttack = 0f;
     bool escaping;
+
+    // track location for two seconds after losing sight
+    float lastSeenTime;
+    float pathRequestCooldown;
 
     public override void EnterState(GoblinStateManager goblin){
         goblin.m_Rigidbody2D.AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
@@ -23,6 +27,8 @@ public class GoblinPursuingState : GoblinBaseState
 
         if (raycastHit2D.collider == null && distance < 2f) 
         {
+            goblin.StopCoroutine("FollowPath");
+
             if(distance > maximumDistance)
             {
                 if(goblin.transform.position.x < goblin.target.position.x){
@@ -51,32 +57,68 @@ public class GoblinPursuingState : GoblinBaseState
                 //starts drawing bow if the player is in line of sight and enough time passed from last attack
                 if(nextAttack < Time.time && raycastHit2D.collider == null){
                     horizontalMove = 0;
+                    //have to reset path otherwise if no new path is found then enemy will not start going to last seen position (if (goblin.path.Length == 0))
+                    goblin.path = new Node[0];
                     goblin.animator.SetFloat("Speed", 0);
                     nextAttack = Time.time+5f;
                     goblin.SwitchState(goblin.shootingState);
                 }
             }
 
-            if (horizontalMove < 0 && !goblin.m_FacingRight)
-            {
-                // ... flip the player.
-                goblin.Flip();
-            }
-            else if (horizontalMove > 0 && goblin.m_FacingRight)
-            {
-                // ... flip the player.
-                goblin.Flip();
-            }
-
-            goblin.jumpCooldown += Time.deltaTime;
+            
             if (goblin.GroundCheck()){
                 WallCheck(goblin);
             }
+
+            goblin.targetLastSeen = goblin.target.position;
+            lastSeenTime = Time.time;
         }
         else
         {
+            if (Time.time < lastSeenTime+1) {
+                goblin.targetLastSeen = goblin.target.position;
+            }
+
             //insert pathfinding to the last scene player location
+            if (pathRequestCooldown > 1f) {
+                PathRequestManager.RequestPath(goblin.transform.position, goblin.targetLastSeen, goblin.OnPathFound);
+                pathRequestCooldown = 0;
+            }
+
+            //if path not found then go towards last scene player location
+            Debug.Log(goblin.path.Length);
+            if (goblin.path.Length == 0)
+            {
+                if(goblin.transform.position.x < goblin.targetLastSeen.x){
+                    horizontalMove = 50f;
+                } else {
+                    horizontalMove = -50f;
+                }
+                goblin.animator.SetFloat("Speed", 1);
+
+                if (goblin.GroundCheck()){
+                    WallCheck(goblin);
+                }
+                if (Mathf.Abs(goblin.transform.position.x - goblin.targetLastSeen.x) < 0.1f || Time.time > lastSeenTime+5) {
+                    goblin.SwitchState(goblin.idleState);
+                }
+            }
+
         }
+
+        if (horizontalMove < 0 && !goblin.m_FacingRight)
+        {
+            // ... flip the player.
+            goblin.Flip();
+        }
+        else if (horizontalMove > 0 && goblin.m_FacingRight)
+        {
+            // ... flip the player.
+            goblin.Flip();
+        }
+
+        goblin.jumpCooldown += Time.deltaTime;
+        pathRequestCooldown += Time.deltaTime;
     }
 
     public override void FixedUpdateState(GoblinStateManager goblin){
@@ -114,13 +156,13 @@ public class GoblinPursuingState : GoblinBaseState
             RaycastHit2D wallCheck = Physics2D.Raycast(goblin.transform.position, Vector2.left, 0.15f, goblin.groundLayerMask);
             if (wallCheck != false){
                 goblin.jumpCooldown = 0;
-                goblin.m_Rigidbody2D.AddForce(new Vector2(0, 3f), ForceMode2D.Impulse);
+                goblin.m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
             }
         } else {
             RaycastHit2D wallCheck = Physics2D.Raycast(goblin.transform.position, Vector2.right, 0.15f, goblin.groundLayerMask);
             if (wallCheck != false){
                 goblin.jumpCooldown = 0;
-                goblin.m_Rigidbody2D.AddForce(new Vector2(0, 3f), ForceMode2D.Impulse);
+                goblin.m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
             }
         }
     }

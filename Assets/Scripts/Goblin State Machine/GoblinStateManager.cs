@@ -14,6 +14,7 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
     public Rigidbody2D m_Rigidbody2D;
     public Animator animator;
     public Transform target;
+    public Vector3 targetLastSeen;
     public Transform bow;
     public GameObject arrow;
     public LayerMask groundLayerMask;
@@ -28,6 +29,9 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
     int currentHealth;
     private float knockbackStr = 80;
 
+    public Node[] path;
+    int targetIndex;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +40,7 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
         currentState.EnterState(this);
 
         currentHealth = maxHealth;
+        path = new Node[0];
     }
 
     // Update is called once per frame
@@ -133,6 +138,59 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
             }
         } else {
             return false;
+        }
+    }
+
+    public void OnPathFound(Node[] newPath, bool pathSuccessful) 
+    {
+        if (pathSuccessful) {
+            path = newPath;
+
+            StopCoroutine("FollowPath");
+            StartCoroutine("FollowPath");
+        } 
+        
+    }
+
+    public IEnumerator FollowPath()
+    {
+        animator.SetFloat("Speed", 1);
+        Vector3 currentWaypoint = path[0].worldPosition;
+        targetIndex = 0;
+
+        while (true) {
+            if (Vector2.Distance(transform.position,currentWaypoint) < 0.1f) {
+                targetIndex++;
+                if (targetIndex >= path.Length) {
+                    path = new Node[0];
+
+                    SwitchState(idleState);
+
+                    yield break;
+                }
+                currentWaypoint = path[targetIndex].worldPosition;
+            }
+
+            //movement towards nodes logic
+            //Debug.Log(path.Length + " is the length of array");
+            Debug.Log(targetIndex + " is the index searched");
+            if (path[targetIndex].jumpToNode && GroundCheck()){
+                jumpCooldown = 0;
+                m_Rigidbody2D.velocity = new Vector2(pursuingState.horizontalMove*Time.deltaTime, 0);
+                yield return new WaitForSeconds(0.1f);
+                m_Rigidbody2D.AddForce(new Vector2(0, 3.25f), ForceMode2D.Impulse);
+            }
+            if(transform.position.x < currentWaypoint.x){
+                pursuingState.horizontalMove = 50;
+            } 
+            else if (Mathf.Abs(transform.position.x - currentWaypoint.x) < 0.02f) {
+                m_Rigidbody2D.velocity = new Vector2(0, m_Rigidbody2D.velocity.y);
+            }
+            else {
+                pursuingState.horizontalMove = -50;
+            }
+
+            yield return null;
         }
     }
 }

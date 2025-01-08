@@ -26,62 +26,64 @@ public class Pathfinding : MonoBehaviour
 
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
+        if (targetNode.type == NodeType.walkable)
+            targetNode = grid.FindGroundedNode(targetNode, 4);
 
         if (startNode.type == NodeType.grounded && targetNode.type == NodeType.grounded) {
-            List<Node> openSet = new List<Node>();
-            HashSet<Node> closedSet = new HashSet<Node>();
-            openSet.Add(startNode);
+                List<Node> openSet = new List<Node>();
+                HashSet<Node> closedSet = new HashSet<Node>();
+                openSet.Add(startNode);
 
-            while (openSet.Count > 0) {
-                // to implement heap, change this block of code to Node currentNode = openSet.RemoveFirst()
-                Node currentNode = openSet[0];
-                for (int i = 1; i < openSet.Count; i++) {
-                    if (openSet[i].fCost < currentNode.fCost || openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost) {
-                        currentNode = openSet[i];
+                while (openSet.Count > 0) {
+                    // to implement heap, change this block of code to Node currentNode = openSet.RemoveFirst()
+                    Node currentNode = openSet[0];
+                    for (int i = 1; i < openSet.Count; i++) {
+                        if (openSet[i].fCost < currentNode.fCost || openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost) {
+                            currentNode = openSet[i];
+                        }
+                    }
+
+                    openSet.Remove(currentNode);
+                    closedSet.Add(currentNode);
+
+                    if (currentNode == targetNode) {
+                        pathSuccess = true;
+                        break;
+                    }
+
+                    foreach (Node neighbour in currentNode.walkNeighbours) {
+                        if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
+                            continue;
+                        }
+
+                        int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                        if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
+                            neighbour.gCost = newMovementCostToNeighbour;
+                            neighbour.hCost = GetDistance(neighbour, targetNode);
+                            neighbour.parent = currentNode;
+                            neighbour.jumpToNode = false;
+
+                            if (!openSet.Contains(neighbour))
+                                openSet.Add(neighbour);
+                        }
+                    }
+                    foreach (Node neighbour in currentNode.jumpNeighbours) {
+                        if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
+                            continue;
+                        }
+
+                        int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
+                        if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
+                            neighbour.gCost = newMovementCostToNeighbour;
+                            neighbour.hCost = GetDistance(neighbour, targetNode);
+                            neighbour.parent = currentNode;
+                            neighbour.jumpToNode = true;
+
+                            if (!openSet.Contains(neighbour))
+                                openSet.Add(neighbour);
+                        }
                     }
                 }
-
-                openSet.Remove(currentNode);
-                closedSet.Add(currentNode);
-
-                if (currentNode == targetNode) {
-                    pathSuccess = true;
-                    break;
-                }
-
-                foreach (Node neighbour in currentNode.walkNeighbours) {
-                    if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
-                        continue;
-                    }
-
-                    int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
-                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
-                        neighbour.gCost = newMovementCostToNeighbour;
-                        neighbour.hCost = GetDistance(neighbour, targetNode);
-                        neighbour.parent = currentNode;
-                        neighbour.jumpToNode = false;
-
-                        if (!openSet.Contains(neighbour))
-                            openSet.Add(neighbour);
-                    }
-                }
-                foreach (Node neighbour in currentNode.jumpNeighbours) {
-                    if (neighbour.type == NodeType.nonWalkable || closedSet.Contains(neighbour)) {
-                        continue;
-                    }
-
-                    int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
-                    if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
-                        neighbour.gCost = newMovementCostToNeighbour;
-                        neighbour.hCost = GetDistance(neighbour, targetNode);
-                        neighbour.parent = currentNode;
-                        neighbour.jumpToNode = true;
-
-                        if (!openSet.Contains(neighbour))
-                            openSet.Add(neighbour);
-                    }
-                }
-            }
         }
         yield return null;
         if (pathSuccess) {
