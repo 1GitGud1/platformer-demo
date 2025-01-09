@@ -16,7 +16,9 @@ public class GoblinPursuingState : GoblinBaseState
     float pathRequestCooldown;
 
     public override void EnterState(GoblinStateManager goblin){
-        goblin.m_Rigidbody2D.AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
+        if (goblin.GroundCheck()) {
+            goblin.m_Rigidbody2D.AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
+        }
         escaping = false;
     }
 
@@ -100,10 +102,13 @@ public class GoblinPursuingState : GoblinBaseState
                     WallCheck(goblin);
                 }
                 if (Mathf.Abs(goblin.transform.position.x - goblin.targetLastSeen.x) < 0.1f || Time.time > lastSeenTime+5) {
-                    goblin.SwitchState(goblin.idleState);
+                    if (Vector2.Distance(goblin.transform.position, goblin.targetLastSeen) < 0.15f){
+                        goblin.SwitchState(goblin.idleState);
+                    } else {
+                        goblin.SwitchState(goblin.searchingState);
+                    }
                 }
             }
-
         }
 
         if (horizontalMove < 0 && !goblin.m_FacingRight)

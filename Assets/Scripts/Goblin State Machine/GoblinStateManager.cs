@@ -124,6 +124,9 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
 
         
         knockbackScript.knockback(point.x, knockbackStr);
+
+        targetLastSeen = target.position;
+        SwitchState(pursuingState);
     }
 
     public bool GroundCheck()
