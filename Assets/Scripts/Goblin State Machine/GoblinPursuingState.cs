@@ -20,6 +20,9 @@ public class GoblinPursuingState : GoblinBaseState
             goblin.m_Rigidbody2D.AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
         }
         escaping = false;
+        //have to reset path otherwise if no new path is found then enemy will not start going to last seen position (if (goblin.path.Length == 0))
+        goblin.path = new Node[0];
+        lastSeenTime = Time.time;
     }
 
     public override void UpdateState(GoblinStateManager goblin){
@@ -47,6 +50,12 @@ public class GoblinPursuingState : GoblinBaseState
                         goblin.StartCoroutine(Evade(goblin));
                     }
                 }
+                // else if(nextAttack < Time.time && raycastHit2D.collider == null){
+                //     horizontalMove = 0;
+                //     goblin.animator.SetFloat("Speed", 0);
+                //     nextAttack = Time.time+5f;
+                //     goblin.SwitchState(goblin.shootingState);
+                // }
                 else if(goblin.transform.position.x < goblin.target.position.x){
                     horizontalMove = -50f;
                 } else {
@@ -59,8 +68,6 @@ public class GoblinPursuingState : GoblinBaseState
                 //starts drawing bow if the player is in line of sight and enough time passed from last attack
                 if(nextAttack < Time.time && raycastHit2D.collider == null){
                     horizontalMove = 0;
-                    //have to reset path otherwise if no new path is found then enemy will not start going to last seen position (if (goblin.path.Length == 0))
-                    goblin.path = new Node[0];
                     goblin.animator.SetFloat("Speed", 0);
                     nextAttack = Time.time+5f;
                     goblin.SwitchState(goblin.shootingState);
@@ -102,7 +109,7 @@ public class GoblinPursuingState : GoblinBaseState
                     WallCheck(goblin);
                 }
                 if (Mathf.Abs(goblin.transform.position.x - goblin.targetLastSeen.x) < 0.1f || Time.time > lastSeenTime+5) {
-                    if (Vector2.Distance(goblin.transform.position, goblin.targetLastSeen) < 0.15f){
+                    if (Vector2.Distance(goblin.transform.position, goblin.targetLastSeen) < 0.05f){
                         goblin.SwitchState(goblin.idleState);
                     } else {
                         goblin.SwitchState(goblin.searchingState);

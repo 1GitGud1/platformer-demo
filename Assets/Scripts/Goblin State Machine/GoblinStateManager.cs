@@ -116,17 +116,20 @@ public class GoblinStateManager : MonoBehaviour, IDamageable
         Debug.Log("Character dealt " + DMG + " damage");
         
         //Play hurt animation
+        
+        targetLastSeen = target.position;
 
         if(currentHealth <= 0)
         {
             SwitchState(deadState);
+        } 
+        else if (currentState == idleState) 
+        {
+            SwitchState(pursuingState);
         }
 
         
         knockbackScript.knockback(point.x, knockbackStr);
-
-        targetLastSeen = target.position;
-        SwitchState(pursuingState);
     }
 
     public bool GroundCheck()

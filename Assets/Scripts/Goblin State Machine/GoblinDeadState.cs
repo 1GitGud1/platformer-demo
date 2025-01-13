@@ -7,6 +7,7 @@ public class GoblinDeadState : GoblinBaseState
     public override void EnterState(GoblinStateManager goblin)
     {
         Debug.Log("Enemy died");
+        goblin.StopAllCoroutines();
 
         goblin.animator.SetBool("isDead", true);
 

@@ -11,6 +11,9 @@ public class GoblinShootingState : GoblinBaseState
         goblin.m_Rigidbody2D.velocity = new Vector2(0, goblin.m_Rigidbody2D.velocity.y);
         goblin.animator.SetBool("Shooting", true);
         goblin.bowAngle = 0;
+
+        //have to reset path otherwise if no new path is found then enemy will not start going to last seen position (if (goblin.path.Length == 0))
+        goblin.path = new Node[0];
     }
 
     public override void UpdateState(GoblinStateManager goblin)
