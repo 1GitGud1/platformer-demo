@@ -86,6 +86,7 @@ public class CharacterController2D : MonoBehaviour
 			m_Rigidbody2D.gravityScale = 0f;
 
 			grab = true;
+			animator.SetBool("isLedgeGrabbing", true);
 			m_AirControl = true;
 		}
 	}
@@ -159,6 +160,7 @@ public class CharacterController2D : MonoBehaviour
 			// Add a vertical force to the player.
 			m_Rigidbody2D.gravityScale = startingGrav;
 			grab = false;
+			animator.SetBool("isLedgeGrabbing", false);
 			m_Grounded = false;
 			m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce), ForceMode2D.Impulse);
 		}
