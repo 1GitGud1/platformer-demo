@@ -23,4 +23,4 @@ MonoBehaviour:
   <DamageBonus>k__BackingField: 15
   <RangeBonus>k__BackingField: 0.15
   <AttackSpeedBonus>k__BackingField: 0
-  weaponType: 0
+  weaponType: 1
